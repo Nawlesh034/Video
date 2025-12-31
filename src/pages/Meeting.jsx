@@ -205,21 +205,28 @@ const [whiteboardDebug, setWhiteboardDebug] = useState(null)
         }
       })
 
-      agoraClient.on("user-unpublished", (user, mediaType) => {
-        console.log("=== USER UNPUBLISHED ===")
-        console.log("User:", user.uid, "MediaType:", mediaType)
-        
-        const userMediaKey = `${user.uid}-${mediaType}`
-        addedContainersRef.current.delete(userMediaKey)
-        
-        if (mediaType === "video") {
-          const playerContainer = document.getElementById(`remote-${user.uid}`)
-          if (playerContainer) {
-            playerContainer.remove()
-            console.log("✓ Removed container for user:", user.uid)
-          }
-        }
-      })
+     agoraClient.on("user-unpublished", async (user, mediaType) => {
+  console.log("❌ user-unpublished", user.uid, mediaType)
+
+  // ✅ STOP VIDEO TRACK
+  if (mediaType === "video" && user.videoTrack) {
+    user.videoTrack.stop()
+  }
+
+  // ✅ REMOVE FULL WRAPPER (NOT JUST VIDEO DIV)
+  const playerContainer = document.getElementById(`remote-${user.uid}`)
+  if (playerContainer) {
+    const wrapper = playerContainer.closest(".remote-video-wrapper")
+    if (wrapper) {
+      wrapper.remove()
+    }
+  }
+
+  // ✅ CLEAR TRACKING KEYS
+  addedContainersRef.current.delete(`${user.uid}-video`)
+  addedContainersRef.current.delete(`${user.uid}-audio`)
+})
+
       
       agoraClient.on("user-left", (user) => {
         console.log("========================================")
@@ -242,8 +249,6 @@ const [whiteboardDebug, setWhiteboardDebug] = useState(null)
           const wrapper = playerContainer.closest('.remote-video-wrapper')
           if (wrapper) {
             wrapper.remove()
-          } else {
-            playerContainer.remove()
           }
           console.log("✓ Removed container for user:", user.uid)
         }
