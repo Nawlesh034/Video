@@ -110,121 +110,187 @@ const [whiteboardDebug, setWhiteboardDebug] = useState(null)
 
       // IMPORTANT: Set up event handlers BEFORE publishing
       // Handle remote users
+      // agoraClient.on("user-published", async (user, mediaType) => {
+      //   console.log("========================================")
+      //   console.log("=== USER PUBLISHED ===")
+      //   console.log("Remote UID:", user.uid, "Type:", typeof user.uid)
+      //   console.log("Local UID:", localUidRef.current, "Type:", typeof localUidRef.current)
+      //   console.log("MediaType:", mediaType)
+      //   console.log("Strict equal (===):", user.uid === localUidRef.current)
+      //   console.log("String compare:", String(user.uid) === String(localUidRef.current))
+      //   console.log("Number compare:", Number(user.uid) === Number(localUidRef.current))
+        
+      //   // // ROBUST CHECK: Skip if this is our own user (multiple comparison methods)
+      //   // const isSameUser = (
+      //   //   user.uid === localUidRef.current ||
+      //   //   String(user.uid) === String(localUidRef.current) ||
+      //   //   Number(user.uid) === Number(localUidRef.current)
+      //   // )
+        
+      //   // if (isSameUser) {
+      //   //   console.log("✓✓✓ SKIPPING OWN USER ✓✓✓")
+      //   //   console.log("========================================")
+      //   //   return
+      //   // }
+        
+      //   // Skip if already subscribed to this user's media type
+      //   const userMediaKey = `${user.uid}-${mediaType}`
+      //   if (addedContainersRef.current.has(userMediaKey)) {
+      //     console.log("✓ Already handling this user's", mediaType)
+      //     console.log("========================================")
+      //     return
+      //   }
+        
+      //   console.log("→→→ SUBSCRIBING TO REMOTE USER:", user.uid, mediaType)
+      //   await agoraClient.subscribe(user, mediaType)
+        
+      //   if (mediaType === "video") {
+      //     addedContainersRef.current.add(userMediaKey)
+          
+      //     // // Track remote user
+      //     // setRemoteUsers(prev => new Set(prev).add(user.uid))
+          
+      //     const remoteVideoTrack = user.videoTrack
+      //     let playerContainer = document.getElementById(`remote-${user.uid}`)
+      //     if (!playerContainer) {
+      //       // Create wrapper for grid item
+      //       const wrapper = document.createElement("div")
+      //       wrapper.className = 'remote-video-wrapper'
+      //       wrapper.style.position = 'relative'
+      //       wrapper.style.width = '100%'
+      //       wrapper.style.aspectRatio = '4/3'
+            
+      //       // Create video container
+      //       playerContainer = document.createElement("div")
+      //       playerContainer.id = `remote-${user.uid}`
+      //       playerContainer.style.width = '100%'
+      //       playerContainer.style.height = '100%'
+      //       playerContainer.style.backgroundColor = '#1e293b'
+      //       playerContainer.style.borderRadius = '12px'
+      //       playerContainer.style.overflow = 'hidden'
+      //       playerContainer.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.3)'
+            
+      //       // Create label
+      //       const label = document.createElement("div")
+      //       label.textContent = `Participant`
+      //       label.style.position = 'absolute'
+      //       label.style.bottom = '10px'
+      //       label.style.left = '10px'
+      //       label.style.backgroundColor = 'rgba(0,0,0,0.7)'
+      //       label.style.color = 'white'
+      //       label.style.padding = '4px 12px'
+      //       label.style.borderRadius = '6px'
+      //       label.style.fontSize = '14px'
+      //       label.style.zIndex = '1'
+            
+      //       wrapper.appendChild(playerContainer)
+      //       wrapper.appendChild(label)
+      //       document.getElementById("remote-videos")?.appendChild(wrapper)
+      //       console.log("✓✓✓ CREATED CONTAINER FOR REMOTE USER:", user.uid)
+      //       console.log("========================================")
+      //     } else {
+      //       console.log("✓ Container already exists for:", user.uid)
+      //       console.log("========================================")
+      //     }
+          
+      //     remoteVideoTrack.play(playerContainer)
+      //     console.log("✓✓✓ PLAYING VIDEO FOR:", user.uid)
+      //   }
+        
+      //   if (mediaType === "audio") {
+      //     addedContainersRef.current.add(userMediaKey)
+      //     user.audioTrack.play()
+      //     console.log("✓✓✓ PLAYING AUDIO FOR:", user.uid)
+      //     console.log("========================================")
+      //   }
+      // })
+
       agoraClient.on("user-published", async (user, mediaType) => {
-        console.log("========================================")
-        console.log("=== USER PUBLISHED ===")
-        console.log("Remote UID:", user.uid, "Type:", typeof user.uid)
-        console.log("Local UID:", localUidRef.current, "Type:", typeof localUidRef.current)
-        console.log("MediaType:", mediaType)
-        console.log("Strict equal (===):", user.uid === localUidRef.current)
-        console.log("String compare:", String(user.uid) === String(localUidRef.current))
-        console.log("Number compare:", Number(user.uid) === Number(localUidRef.current))
-        
-        // ROBUST CHECK: Skip if this is our own user (multiple comparison methods)
-        const isSameUser = (
-          user.uid === localUidRef.current ||
-          String(user.uid) === String(localUidRef.current) ||
-          Number(user.uid) === Number(localUidRef.current)
-        )
-        
-        if (isSameUser) {
-          console.log("✓✓✓ SKIPPING OWN USER ✓✓✓")
-          console.log("========================================")
-          return
-        }
-        
-        // Skip if already subscribed to this user's media type
-        const userMediaKey = `${user.uid}-${mediaType}`
-        if (addedContainersRef.current.has(userMediaKey)) {
-          console.log("✓ Already handling this user's", mediaType)
-          console.log("========================================")
-          return
-        }
-        
-        console.log("→→→ SUBSCRIBING TO REMOTE USER:", user.uid, mediaType)
+        console.log("REMOTE USER:", user.uid, mediaType)
+      
         await agoraClient.subscribe(user, mediaType)
-        
+      
         if (mediaType === "video") {
-          addedContainersRef.current.add(userMediaKey)
-          
-          // // Track remote user
-          // setRemoteUsers(prev => new Set(prev).add(user.uid))
-          
-          const remoteVideoTrack = user.videoTrack
-          let playerContainer = document.getElementById(`remote-${user.uid}`)
+          const containerId = `remote-${user.uid}`
+      
+          let playerContainer = document.getElementById(containerId)
+      
           if (!playerContainer) {
-            // Create wrapper for grid item
             const wrapper = document.createElement("div")
-            wrapper.className = 'remote-video-wrapper'
-            wrapper.style.position = 'relative'
-            wrapper.style.width = '100%'
-            wrapper.style.aspectRatio = '4/3'
-            
-            // Create video container
+            wrapper.className = "remote-video-wrapper"
+            wrapper.style.position = "relative"
+            wrapper.style.width = "100%"
+            wrapper.style.aspectRatio = "4/3"
+      
             playerContainer = document.createElement("div")
-            playerContainer.id = `remote-${user.uid}`
-            playerContainer.style.width = '100%'
-            playerContainer.style.height = '100%'
-            playerContainer.style.backgroundColor = '#1e293b'
-            playerContainer.style.borderRadius = '12px'
-            playerContainer.style.overflow = 'hidden'
-            playerContainer.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.3)'
-            
-            // Create label
+            playerContainer.id = containerId
+            playerContainer.style.width = "100%"
+            playerContainer.style.height = "100%"
+            playerContainer.style.backgroundColor = "#1e293b"
+            playerContainer.style.borderRadius = "12px"
+            playerContainer.style.overflow = "hidden"
+      
             const label = document.createElement("div")
-            label.textContent = `Participant`
-            label.style.position = 'absolute'
-            label.style.bottom = '10px'
-            label.style.left = '10px'
-            label.style.backgroundColor = 'rgba(0,0,0,0.7)'
-            label.style.color = 'white'
-            label.style.padding = '4px 12px'
-            label.style.borderRadius = '6px'
-            label.style.fontSize = '14px'
-            label.style.zIndex = '1'
-            
+            label.innerText = "Participant"
+            label.style.position = "absolute"
+            label.style.bottom = "10px"
+            label.style.left = "10px"
+            label.style.background = "rgba(0,0,0,0.7)"
+            label.style.color = "white"
+            label.style.padding = "4px 10px"
+            label.style.borderRadius = "6px"
+            label.style.fontSize = "14px"
+      
             wrapper.appendChild(playerContainer)
             wrapper.appendChild(label)
             document.getElementById("remote-videos")?.appendChild(wrapper)
-            console.log("✓✓✓ CREATED CONTAINER FOR REMOTE USER:", user.uid)
-            console.log("========================================")
-          } else {
-            console.log("✓ Container already exists for:", user.uid)
-            console.log("========================================")
           }
-          
-          remoteVideoTrack.play(playerContainer)
-          console.log("✓✓✓ PLAYING VIDEO FOR:", user.uid)
+      
+          user.videoTrack.play(playerContainer)
         }
-        
+      
         if (mediaType === "audio") {
-          addedContainersRef.current.add(userMediaKey)
           user.audioTrack.play()
-          console.log("✓✓✓ PLAYING AUDIO FOR:", user.uid)
-          console.log("========================================")
         }
+      
+        setRemoteUsers(prev => new Set(prev).add(user.uid))
       })
+      
 
-     agoraClient.on("user-unpublished", async (user, mediaType) => {
-  console.log("❌ user-unpublished", user.uid, mediaType)
+//      agoraClient.on("user-unpublished", async (user, mediaType) => {
+//   console.log("❌ user-unpublished", user.uid, mediaType)
 
-  // ✅ STOP VIDEO TRACK
-  if (mediaType === "video" && user.videoTrack) {
-    user.videoTrack.stop()
-  }
+//   // ✅ STOP VIDEO TRACK
+//   if (mediaType === "video" && user.videoTrack) {
+//     user.videoTrack.stop()
+//   }
 
-  // ✅ REMOVE FULL WRAPPER (NOT JUST VIDEO DIV)
-  const playerContainer = document.getElementById(`remote-${user.uid}`)
-  if (playerContainer) {
-    const wrapper = playerContainer.closest(".remote-video-wrapper")
-    if (wrapper) {
-      wrapper.remove()
+//   // ✅ REMOVE FULL WRAPPER (NOT JUST VIDEO DIV)
+//   const playerContainer = document.getElementById(`remote-${user.uid}`)
+//   if (playerContainer) {
+//     const wrapper = playerContainer.closest(".remote-video-wrapper")
+//     if (wrapper) {
+//       wrapper.remove()
+//     }
+//   }
+
+//   // ✅ CLEAR TRACKING KEYS
+//   addedContainersRef.current.delete(`${user.uid}-video`)
+//   addedContainersRef.current.delete(`${user.uid}-audio`)
+// })
+agoraClient.on("user-unpublished", (user, mediaType) => {
+  if (mediaType === "video") {
+    const el = document.getElementById(`remote-${user.uid}`)
+    if (el) {
+      el.closest(".remote-video-wrapper")?.remove()
     }
   }
 
-  // ✅ CLEAR TRACKING KEYS
-  addedContainersRef.current.delete(`${user.uid}-video`)
-  addedContainersRef.current.delete(`${user.uid}-audio`)
+  setRemoteUsers(prev => {
+    const copy = new Set(prev)
+    copy.delete(user.uid)
+    return copy
+  })
 })
 
       
